@@ -70,6 +70,8 @@ func newStackPackageCmd(rootConfig *RootCommandConfig) *cobra.Command {
 	// 3. build a docker image
 	// 4. create/update an appsody repo for the stack
 
+	var imageNamespace string
+
 	var stackPackageCmd = &cobra.Command{
 		Use:   "package",
 		Short: "Package a stack in the local Appsody environment",
@@ -101,7 +103,7 @@ func newStackPackageCmd(rootConfig *RootCommandConfig) *cobra.Command {
 			appsodyHome := getHome(rootConfig)
 			Debug.Log("appsodyHome is:", appsodyHome)
 
-			devLocal := filepath.Join(appsodyHome, "stacks", "dev.local")
+			devLocal := filepath.Join(appsodyHome, "stacks", imageNamespace)
 			Debug.Log("devLocal is: ", devLocal)
 
 			// create the devLocal directory in appsody home
@@ -114,7 +116,7 @@ func newStackPackageCmd(rootConfig *RootCommandConfig) *cobra.Command {
 			stackName := filepath.Base(stackPath)
 			Debug.Log("stackName is: ", stackName)
 
-			indexFileLocal := filepath.Join(devLocal, "index-dev-local.yaml")
+			indexFileLocal := filepath.Join(devLocal, "dev-local-index.yaml")
 			Debug.Log("indexFileLocal is: ", indexFileLocal)
 
 			// create IndexYaml struct and populate the APIVersion and Stacks header
@@ -231,9 +233,8 @@ func newStackPackageCmd(rootConfig *RootCommandConfig) *cobra.Command {
 				newStackStruct.Templates = append(newStackStruct.Templates, newTemplateStruct)
 
 				// docker build
-
 				// create the image name to be used for the docker image
-				buildImage := "dev.local/" + stackName + ":SNAPSHOT"
+				buildImage := imageNamespace + "/" + stackName + ":" + "SNAPSHOT"
 
 				imageDir := filepath.Join(stackPath, "image")
 				Debug.Log("imageDir is: ", imageDir)
@@ -326,5 +327,8 @@ func newStackPackageCmd(rootConfig *RootCommandConfig) *cobra.Command {
 			return nil
 		},
 	}
+
+	stackPackageCmd.PersistentFlags().StringVar(&imageNamespace, "image-namespace", "dev.local", "namespace for the images (default is dev.local)")
+
 	return stackPackageCmd
 }
