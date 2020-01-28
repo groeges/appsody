@@ -165,6 +165,11 @@ Run this command from the root directory of your Appsody project.`,
 					return errors.Errorf("Error creating projectDir: %v", err)
 				}
 
+                err = os.Chmod(projectDir, 0777)
+				if err != nil {
+					return errors.Errorf("Error changing file permision: %v", err)
+				}
+
 				rootConfig.Info.Log("Created project dir: " + projectDir)
 
 				defer os.RemoveAll(projectDir)
